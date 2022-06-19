@@ -1,12 +1,15 @@
 from satellite import Satellite
+import antColony as ac
+
+import numpy as np
 
 INF = 1e9
 
 class Topology():
 	def __init__(self):
-		self.num = 0
+		self.satNum = 0
 		self.satellites = []
-		self.costMatrix = []
+		self.cost = []
 
 	def readTopoFromTxt(self, posFilePath, linkFilePath):
 		pFile = open(posFilePath, "r")
@@ -29,29 +32,28 @@ class Topology():
 				tmpSat.lon.append(lon)
 				tmpSat.lat.append(lat)
 				tmpSat.height.append(hei)
-		self.num = len(self.satellites)
+		self.satNum = len(self.satellites)
 		#link
 		for line in lFile:
 			line = line.split()
 			id = int(line[1])
 			neis = []
-			for nei in line[2:-1]:
+			for nei in line[2:]:
 				nei = int(nei)
-				if nei >= 0 and nei < self.num:
+				if nei >= 0 and nei < self.satNum:
 					neis.append(nei)
 			self.satellites[int(id)].neighbour.append(neis)
 
 	def update(self, t):
-		self.costMatrix = [[INF for i in range(self.num)] for i in range(self.num)]
+		self.cost = np.ones((self.satNum, self.satNum))
+		self.cost[:] = INF 
 		for sat in self.satellites:
 			for nei in sat.neighbour[t]:
-				self.costMatrix[sat.id][nei] = sat.getDelayWith(self.satellites[nei], t)
+				self.cost[sat.id][nei] = sat.getDelayWith(self.satellites[nei], t)
 
 			
 		
 
 topo = Topology()
 topo.readTopoFromTxt("position.txt", "link.txt")
-for i in range(10):
-	topo.update(i)
-	print(topo.costMatrix)
+ac.AntColonyRouting(topo, np.random.randint(topo.satNum), np.random.randint(topo.satNum), np.random.randint(10))
