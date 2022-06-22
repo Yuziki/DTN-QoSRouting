@@ -1,7 +1,9 @@
+from cgi import print_form
 from satellite import Satellite
-import antColony as ac
-
 import numpy as np
+from antColony import *
+from dijkstra import *
+
 
 INF = 1e9
 
@@ -56,4 +58,9 @@ class Topology():
 
 topo = Topology()
 topo.readTopoFromTxt("position.txt", "link.txt")
-ac.AntColonyRouting(topo, np.random.randint(topo.satNum), np.random.randint(topo.satNum), np.random.randint(10))
+start = np.random.randint(topo.satNum)
+end = np.random.randint(topo.satNum)
+time = np.random.randint(10)
+topo.update(time)
+AntColonyRouting(topo, start, end, time)
+print("dijkstra: ", DijkstraRouting(topo, start, end, time))

@@ -1,4 +1,3 @@
-#AntColonyRouting
 from json.encoder import INFINITY
 import numpy as np
 
@@ -7,12 +6,11 @@ ALPHA = 1 #信息素重要程度因子
 BETA = 0.1 #启发函数重要程度因子
 RHO = 0.1 #信息素挥发因子
 Q = 100 #单只蚂蚁携带信息素数量
-ITER_TIME = 20 #迭代次数
+ITER_TIME = 100 #迭代次数
 
 
 def AntColonyRouting(topo, start, end, t):
 	np.random.seed()
-	topo.update(t)
 	num = topo.satNum
 	Tau = np.ones((num, num)) #信息素矩阵
 	Poss = np.zeros((num, num)) #概率矩阵
@@ -46,13 +44,13 @@ def AntColonyRouting(topo, start, end, t):
 						break
 					else:
 						p -= Poss[cur][nei] / totalPoss
-			#print(i, end = "")
-			#print(visit, end = "")
+			print(i, end = "")
+			print(visit, end = "")
 			totalDelay = 0
 			if visit[-1] == end:
 				for j in range(len(visit) - 1):
 					totalDelay += topo.cost[visit[j]][ visit[j + 1]]
-			#print(totalDelay)
+			print(totalDelay)
 			if totalDelay != 0:
 				paths.append(visit)
 				pathcosts.append(totalDelay)
