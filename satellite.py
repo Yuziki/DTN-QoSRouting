@@ -1,15 +1,18 @@
-import math as m
+from math import * 
 
 lightSpeed = 3e8
-earthRadius = 63781370
+EARTH_RADIUS = 6378
 
 def disBetween(a, b, t):
-	lonDis = a.lon[t] - b.lon[t]
-	latDis = a.lat[t] - b.lat[t]
-	s = 2 * m.asin(
-		m.sqrt(
-			m.pow(m.sin(latDis / 2), 2) + m.cos(a.lat[t]) * m.cos(b.lat[t]) * m.pow(m.sin(lonDis / 2), 2)))
-	return s * (earthRadius + max(a.height[t], b.height[t]) * 1000)
+	x1 = (a.height[t] + EARTH_RADIUS) * cos(a.lat[t]) * cos(a.lon[t])
+	y1 = (a.height[t] + EARTH_RADIUS) * cos(a.lat[t]) * sin(a.lon[t])
+	z1 = (a.height[t] + EARTH_RADIUS) * sin(a.lat[t])
+
+	x2 = (b.height[t] + EARTH_RADIUS) * cos(b.lat[t]) * cos(b.lon[t])
+	y2 = (b.height[t] + EARTH_RADIUS) * cos(b.lat[t]) * sin(b.lon[t])
+	z2 = (b.height[t] + EARTH_RADIUS) * sin(b.lat[t])
+
+	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2) + pow(z1 - z2, 2)) * 1000  
 
 class Satellite():
 	def __init__(self, id = -1):
@@ -17,7 +20,7 @@ class Satellite():
 		self.lon = []
 		self.lat = []
 		self.height = []
-		self.neighbour = []
+		self.neis = []
 
 	def getDelayWith(self, nei, t):
 		#计算时延，单位s

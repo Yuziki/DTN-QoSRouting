@@ -1,5 +1,34 @@
 
-def DijkstraRouting(topo, start, end, t):
+from utils import *
+
+def DijkstraRouting(topo, req):
+	result = Result()
+	result.duration = req.dur
+	recur(topo, req.start, req.end, req.t, req.dur, result)
+	if result.delay == 0:
+		result.lossRate = 1
+	else:
+		result.lossRate = result.lossTime / req.dur
+		result.delay /= req.dur
+	return result
+
+def recur(topo, start, end, t, dur, result):
+	topo.updateCost(t)
+	ret = dijkstra(topo, start, end, t)
+	path = ret[0]
+	result.paths.append(path)
+	minLT = INF
+	for i in range(len(path) - 1):
+		minLT = min(minLT, topo.lifeTime[t][path[i]][path[i + 1]])
+	if minLT < dur:
+		result.lossTime += REROUTING_TIME
+		result.delay += ret[1] * minLT
+		recur(topo, start, end, t + minLT, dur - minLT, result)
+	else:
+		result.delay += ret[1] * dur
+
+def dijkstra(topo, start, end, t):
+	topo.updateCost(t)
 	cost = [1e9 for i in range(topo.satNum)]
 	prev = [-1 for i in range(topo.satNum)]
 	cost[start] = 0
@@ -14,7 +43,7 @@ def DijkstraRouting(topo, start, end, t):
 		if cur == end:
 			break
 		visit.add(cur)
-		for nei in topo.satellites[cur].neighbour[t]:
+		for nei in topo.satellites[cur].neis[t]:
 			if cost[cur] + topo.cost[cur][nei] <  cost[nei]:
 				cost[nei] = cost[cur] + topo.cost[cur][nei]
 				prev[nei] = cur
@@ -23,7 +52,10 @@ def DijkstraRouting(topo, start, end, t):
 		path.append(prev[cur])
 		cur = prev[cur]
 	path.reverse()
-	return path	
+	delay = 0
+	for i in range(len(path) - 1):
+		delay += topo.cost[path[i]][path[i + 1]]
+	return [path, delay]	
 
 		
 
